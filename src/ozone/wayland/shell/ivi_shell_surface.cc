@@ -33,8 +33,13 @@ void IVIShellSurface::InitializeShellSurface(WaylandWindow* window,
   DCHECK(shell && shell->GetIVIShell());
 
   // The window_manager on AGL handles surface_id 0 as an invalid id.
-  if (surface_id == 0)
+  if (surface_id == 0) {
+    fprintf(stderr, "surface_id was 0, setting surface_id = %d\n", static_cast<int>(getpid()));
     surface_id = static_cast<int>(getpid());
+  } else {
+    fprintf(stderr, "surface_id was %d\n", surface_id);
+    fprintf(stderr, "pid is %d\n", static_cast<int>(getpid()));
+  }
 
   ivi_surface_ = ivi_application_surface_create(shell->GetIVIShell(),
                                                 surface_id, GetWLSurface());
