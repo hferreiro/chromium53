@@ -163,6 +163,7 @@ int MapOpenSSLErrorWithDetails(int err,
   switch (err) {
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
+      fprintf(stderr, "io pending\n");
       return ERR_IO_PENDING;
     case SSL_ERROR_SYSCALL:
       LOG(ERROR) << "OpenSSL SYSCALL error, earliest error code in "
@@ -170,6 +171,7 @@ int MapOpenSSLErrorWithDetails(int err,
                  << errno;
       return ERR_FAILED;
     case SSL_ERROR_SSL:
+      fprintf(stderr, "ssl error ssl\n");
       // Walk down the error stack to find an SSL or net error.
       uint32_t error_code;
       const char* file;
@@ -180,6 +182,7 @@ int MapOpenSSLErrorWithDetails(int err,
           out_error_info->error_code = error_code;
           out_error_info->file = file;
           out_error_info->line = line;
+          fprintf(stderr, "call MapOpenSSLErorSSL\n");
           return MapOpenSSLErrorSSL(error_code);
         } else if (ERR_GET_LIB(error_code) == OpenSSLNetErrorLib()) {
           out_error_info->error_code = error_code;
@@ -187,9 +190,11 @@ int MapOpenSSLErrorWithDetails(int err,
           out_error_info->line = line;
           // Net error codes are negative but encoded in OpenSSL as positive
           // numbers.
+          fprintf(stderr, "err_get_reason\n");
           return -ERR_GET_REASON(error_code);
         }
       } while (error_code != 0);
+      fprintf(stderr, "err_failed\n");
       return ERR_FAILED;
     default:
       // TODO(joth): Implement full mapping.
